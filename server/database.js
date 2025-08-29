@@ -11,7 +11,7 @@ const pool = mysql
   })
   .promise();
 
-export async function getTodoById(id) {
+export async function getTodosById(id) {
   const [rows] = await pool.query(
     `
     SELECT todos.*, shared_todos.shared_with_id
@@ -77,7 +77,7 @@ export async function toggleCompleted(id, value) {
   const [result] = await pool.query(
     `
         UPDATE todos
-        SET completed = #{newValue}
+        SET completed = ?
         WHERE id = ?;
         `,
     [id]

@@ -10,3 +10,20 @@ import {
   getUserById,
   getSharedTodoById,
 } from "./database.js";
+
+const app = express();
+app.use(express.json());
+
+console.log("test");
+
+app.get("/todos/:id", async (req, res) => {
+  const todos = await getTodosById(req.params.id);
+  res.status(200).send(todos);
+});
+
+app.listen(8080, () => {
+  console.log("Server running on port 8080");
+});
+
+//cd server
+//yarn dev para correr el servidos
