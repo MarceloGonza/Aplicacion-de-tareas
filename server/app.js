@@ -13,9 +13,13 @@ import {
 import cors from "cors";
 
 const corsOptions = {
-  origin: "http://127.0.0.1:5173", //(ruta de origen)
-  method: ["POST", "GET"], //(metodos)
-  Credentials: true, //(cookies, authentication)
+  origin: [
+    "http://127.0.0.1:5173", // tu front en Vite
+    "http://localhost:5173", // por si lo abrís así
+    "http://192.168.1.6:8081", // Expo en LAN (ajusta IP y puerto según tu máquina)
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
 };
 const app = express();
 app.use(express.json());
