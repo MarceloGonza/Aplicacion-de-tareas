@@ -1,6 +1,8 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { SafeAreaView, StyleSheet, View, Text } from "react-native";
 import { useEffect, useState } from "react";
+import { FlatList } from "react-native-gesture-handler";
+import Task from "../../components/Task";
 
 export default function HomeScreen() {
   const [todos, setTodos] = useState([]);
@@ -16,28 +18,32 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.titleContainer}>
-      <Text>{JSON.stringify(todos)}</Text>
+    <View style={styles.container}>
+      <SafeAreaView>
+        <FlatList
+          data={todos}
+          keyExtractor={(todo) => todo.id}
+          renderItem={({ item }) => <Task {...item} />}
+          ListHeaderComponent={() => <Text style={styles.title}>Today</Text>}
+          contentContainerStyle={styles.contentContainerStyle}
+        />
+      </SafeAreaView>
       <StatusBar style="auto" />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
+  container: {
+    flex: 1,
+    backgroundColor: "#E9E9EF",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  contentContainerStyle: {
+    padding: 15,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
+  title: {
+    fontWeight: "800",
+    fontSize: 28,
+    marginBottom: 15,
   },
 });

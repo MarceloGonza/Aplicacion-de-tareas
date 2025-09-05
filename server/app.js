@@ -71,4 +71,10 @@ app.listen(8080, () => {
 });
 
 //cd server
-//yarn dev para correr el servidos
+//yarn dev para correr el servidor
+
+//para correr expo:
+//cd client
+//cd my-app
+//npx expo start
+//w para abrir en pagina web
