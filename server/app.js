@@ -14,9 +14,9 @@ import cors from "cors";
 
 const corsOptions = {
   origin: [
-    "http://127.0.0.1:5173", // tu front en Vite
-    "http://localhost:5173", // por si lo abrís así
-    "http://192.168.1.6:8081", // Expo en LAN (ajusta IP y puerto según tu máquina)
+    "http://127.0.0.1:5173",
+    "http://localhost:5173",
+    "http://192.168.1.6:8081",
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
