@@ -73,16 +73,18 @@ export async function deleteTodo(id) {
 }
 
 export async function toggleCompleted(id, value) {
-  const newValue = value === true ? "TRUE" : "FALSE";
+  const newValue = value ? 1 : 0;
+
   const [result] = await pool.query(
     `
-        UPDATE todos
-        SET completed = ?
-        WHERE id = ?;
-        `,
-    [id]
+      UPDATE todos
+      SET completed = ?
+      WHERE id = ?;
+    `,
+    [newValue, id]
   );
-  return result;
+
+  return { id, completed: newValue };
 }
 
 export async function shareTodo(todo_id, user_id, shared_with_id) {

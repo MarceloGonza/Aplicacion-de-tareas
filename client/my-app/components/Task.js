@@ -6,21 +6,19 @@ import {
   Pressable,
   StyleSheet,
 } from "react-native";
-
 import { Feather } from "@expo/vector-icons";
 
-function CheckMark({ id, completed, toggleTodo }) {
+function CheckMark({ id, initialCompleted, toggleTodoOnServer }) {
+  const [completed, setCompleted] = React.useState(initialCompleted);
+
   async function toggle() {
+    setCompleted(!completed);
+
     try {
       const response = await fetch(`http://192.168.1.6:8080/todos/${id}`, {
         method: "PUT",
-        headers: {
-          "x-api-key": "abcdef123456",
-          "Content-Type": "application/json", // <- corregido
-        },
-        body: JSON.stringify({
-          value: completed === 1 ? false : true, // <- explícito
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value: completed ? 0 : 1 }),
       });
 
       if (!response.ok) {
@@ -28,10 +26,11 @@ function CheckMark({ id, completed, toggleTodo }) {
       }
 
       const data = await response.json();
-      toggleTodo(id);
-      console.log(data);
+      toggleTodoOnServer(id, data.completed);
     } catch (err) {
       console.error("Toggle error:", err);
+      // Revertir si falla
+      setCompleted(!completed);
     }
   }
 
@@ -42,46 +41,50 @@ function CheckMark({ id, completed, toggleTodo }) {
         styles.checkMark,
         { backgroundColor: completed ? "#0EA5E9" : "#E9E9EF" },
       ]}
-    ></Pressable>
+    />
   );
 }
 
-function Task({ id, title, shared_with_id, completed, clearTodo, toggleTodo }) {
+function Task({ id, title, shared_with_id, completed, clearTodo }) {
   const [isDeletedActive, setIsDeletedActive] = React.useState(false);
 
   async function deleteTodo() {
-    const response = await fetch(`http://192.168.1.6:8080/todos/${id}`, {
-      method: "DELETE",
-    });
-    clearTodo(id);
-    console.log(response.status);
+    try {
+      const response = await fetch(`http://192.168.1.6:8080/todos/${id}`, {
+        method: "DELETE",
+      });
+      if (response.ok) clearTodo(id);
+    } catch (err) {
+      console.error("Delete error:", err);
+    }
   }
+
+  async function toggleTodoOnServer(id, newCompleted) {
+    console.log(`Todo ${id} actualizado a completed=${newCompleted}`);
+  }
+
   return (
     <TouchableOpacity
       onLongPress={() => setIsDeletedActive(true)}
       onPress={() => setIsDeletedActive(false)}
       activeOpacity={0.8}
-      style={[styles.container]}
+      style={styles.container}
     >
       <View style={styles.containerTextCheckBox}>
-        <CheckMark id={id} completed={completed} toggleTodo={toggleTodo} />
+        <CheckMark
+          id={id}
+          initialCompleted={completed === 1}
+          toggleTodoOnServer={toggleTodoOnServer}
+        />
         <Text style={styles.subtitle}>{title}</Text>
       </View>
-      {shared_with_id !== null ? (
-        <Feather
-          //onPress={handlePresentShred}
-          name="users"
-          size={20}
-          color="#383839"
-        />
+
+      {shared_with_id ? (
+        <Feather name="users" size={20} color="#383839" />
       ) : (
-        <Feather
-          //onPress={handlePresentModal}
-          name="share"
-          size={20}
-          color="#383839"
-        />
+        <Feather name="share" size={20} color="#383839" />
       )}
+
       {isDeletedActive && (
         <Pressable onPress={deleteTodo} style={styles.deleteButton}>
           <Text style={{ color: "white", fontWeight: "bold" }}>X</Text>
@@ -124,32 +127,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
   },
-  contentContainer: {
-    flex: 1,
-    alignItems: "center",
-    paddingHorizontal: 15,
-  },
-  row: {
-    width: "100%",
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginVertical: 10,
-  },
-  title: {
-    fontWeight: "900",
-    letterSpacing: 0.5,
-    fontSize: 16,
-  },
-  subtitle: {
-    color: "#101318",
-    fontSize: 14,
-    fontWeight: "bold",
-  },
-  description: {
-    color: "#56636F",
-    fontSize: 13,
-    fontWeight: "normal",
-    width: "100%",
-  },
+  subtitle: { color: "#101318", fontSize: 14, fontWeight: "bold" },
 });
