@@ -1,7 +1,6 @@
 import { StatusBar } from "expo-status-bar";
-import { SafeAreaView, StyleSheet, View, Text } from "react-native";
+import { SafeAreaView, StyleSheet, View, Text, FlatList } from "react-native";
 import { useEffect, useState } from "react";
-import { FlatList } from "react-native-gesture-handler";
 import Task from "../../components/Task";
 
 export default function HomeScreen() {
@@ -15,6 +14,21 @@ export default function HomeScreen() {
     const response = await fetch("http://192.168.1.6:8080/todos/1");
     const data = await response.json();
     setTodos(data);
+    console.log(data);
+  }
+
+  function clearTodo(id) {
+    setTodos(todos.filter((todo) => todo.id !== id));
+  }
+
+  function toggleTodo(id) {
+    setTodos(
+      todos.map((todo) =>
+        todo.id === id
+          ? { ...todo, completed: todo.completed === 1 ? 0 : 1 }
+          : todo
+      )
+    );
   }
 
   return (
@@ -23,7 +37,9 @@ export default function HomeScreen() {
         <FlatList
           data={todos}
           keyExtractor={(todo) => todo.id}
-          renderItem={({ item }) => <Task {...item} />}
+          renderItem={({ item }) => (
+            <Task {...item} toggleTodo={toggleTodo} clearTodo={clearTodo} />
+          )}
           ListHeaderComponent={() => <Text style={styles.title}>Today</Text>}
           contentContainerStyle={styles.contentContainerStyle}
         />
