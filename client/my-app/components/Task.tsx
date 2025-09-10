@@ -8,12 +8,21 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
-function CheckMark({ id, initialCompleted, toggleTodoOnServer }) {
+interface CheckMarkProps {
+  id: number;
+  initialCompleted: boolean;
+  toggleTodoOnServer: (id: number, newCompleted: boolean) => void;
+}
+
+function CheckMark({
+  id,
+  initialCompleted,
+  toggleTodoOnServer,
+}: CheckMarkProps) {
   const [completed, setCompleted] = React.useState(initialCompleted);
 
   async function toggle() {
     setCompleted(!completed);
-
     try {
       const response = await fetch(`http://192.168.1.6:8080/todos/${id}`, {
         method: "PUT",
@@ -21,15 +30,12 @@ function CheckMark({ id, initialCompleted, toggleTodoOnServer }) {
         body: JSON.stringify({ value: completed ? 0 : 1 }),
       });
 
-      if (!response.ok) {
-        throw new Error("Error al actualizar el todo");
-      }
+      if (!response.ok) throw new Error("Error al actualizar el todo");
 
       const data = await response.json();
-      toggleTodoOnServer(id, data.completed);
+      toggleTodoOnServer(id, !!data.completed);
     } catch (err) {
       console.error("Toggle error:", err);
-      // Revertir si falla
       setCompleted(!completed);
     }
   }
@@ -45,7 +51,23 @@ function CheckMark({ id, initialCompleted, toggleTodoOnServer }) {
   );
 }
 
-function Task({ id, title, shared_with_id, completed, clearTodo }) {
+interface TaskProps {
+  id: number;
+  title: string;
+  completed: 0 | 1;
+  shared_with_id?: number | null;
+  clearTodo: (id: number) => void;
+  toggleTodo: (id: number) => void;
+}
+
+function Task({
+  id,
+  title,
+  shared_with_id,
+  completed,
+  clearTodo,
+  toggleTodo,
+}: TaskProps) {
   const [isDeletedActive, setIsDeletedActive] = React.useState(false);
 
   async function deleteTodo() {
@@ -59,7 +81,7 @@ function Task({ id, title, shared_with_id, completed, clearTodo }) {
     }
   }
 
-  async function toggleTodoOnServer(id, newCompleted) {
+  function toggleTodoOnServer(id: number, newCompleted: boolean) {
     console.log(`Todo ${id} actualizado a completed=${newCompleted}`);
   }
 

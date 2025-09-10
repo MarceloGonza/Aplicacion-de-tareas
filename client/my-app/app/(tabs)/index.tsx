@@ -2,9 +2,17 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaView, StyleSheet, View, Text, FlatList } from "react-native";
 import { useEffect, useState } from "react";
 import Task from "../../components/Task";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+
+export interface Todo {
+  id: number;
+  title: string;
+  completed: 0 | 1;
+  user_id: number;
+}
 
 export default function HomeScreen() {
-  const [todos, setTodos] = useState([]);
+  const [todos, setTodos] = useState<Todo[]>([]);
 
   useEffect(() => {
     fetchData();
@@ -17,11 +25,11 @@ export default function HomeScreen() {
     console.log(data);
   }
 
-  function clearTodo(id) {
+  function clearTodo(id: number) {
     setTodos(todos.filter((todo) => todo.id !== id));
   }
 
-  function toggleTodo(id) {
+  function toggleTodo(id: number) {
     setTodos(
       todos.map((todo) =>
         todo.id === id
@@ -32,20 +40,22 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView>
-        <FlatList
-          data={todos}
-          keyExtractor={(todo) => todo.id}
-          renderItem={({ item }) => (
-            <Task {...item} toggleTodo={toggleTodo} clearTodo={clearTodo} />
-          )}
-          ListHeaderComponent={() => <Text style={styles.title}>Today</Text>}
-          contentContainerStyle={styles.contentContainerStyle}
-        />
-      </SafeAreaView>
-      <StatusBar style="auto" />
-    </View>
+    <BottomSheetModalProvider>
+      <View style={styles.container}>
+        <SafeAreaView>
+          <FlatList
+            data={todos}
+            keyExtractor={(todo) => todo.id.toString()}
+            renderItem={({ item }) => (
+              <Task {...item} toggleTodo={toggleTodo} clearTodo={clearTodo} />
+            )}
+            ListHeaderComponent={() => <Text style={styles.title}>Today</Text>}
+            contentContainerStyle={styles.contentContainerStyle}
+          />
+        </SafeAreaView>
+        <StatusBar style="auto" />
+      </View>
+    </BottomSheetModalProvider>
   );
 }
 
