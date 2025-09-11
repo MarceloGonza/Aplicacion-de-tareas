@@ -1,8 +1,8 @@
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaView, StyleSheet, View, Text, FlatList } from "react-native";
 import { useEffect, useState } from "react";
 import Task from "../../components/Task";
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 export interface Todo {
   id: number;

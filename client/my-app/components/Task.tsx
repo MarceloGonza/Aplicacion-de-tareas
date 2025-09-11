@@ -1,3 +1,4 @@
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import * as React from "react";
 import {
   View,
@@ -5,6 +6,7 @@ import {
   TouchableOpacity,
   Pressable,
   StyleSheet,
+  Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 
@@ -60,15 +62,15 @@ interface TaskProps {
   toggleTodo: (id: number) => void;
 }
 
-function Task({
-  id,
-  title,
-  shared_with_id,
-  completed,
-  clearTodo,
-  toggleTodo,
-}: TaskProps) {
+function Task({ id, title, shared_with_id, completed, clearTodo }: TaskProps) {
   const [isDeletedActive, setIsDeletedActive] = React.useState(false);
+
+  const bottomSheetRef = React.useRef<BottomSheetModal>(null);
+  const snapPoints = ["40%"];
+
+  function handlePresentModal() {
+    bottomSheetRef.current?.present();
+  }
 
   async function deleteTodo() {
     try {
@@ -86,33 +88,56 @@ function Task({
   }
 
   return (
-    <TouchableOpacity
-      onLongPress={() => setIsDeletedActive(true)}
-      onPress={() => setIsDeletedActive(false)}
-      activeOpacity={0.8}
-      style={styles.container}
-    >
-      <View style={styles.containerTextCheckBox}>
-        <CheckMark
-          id={id}
-          initialCompleted={completed === 1}
-          toggleTodoOnServer={toggleTodoOnServer}
+    <>
+      <TouchableOpacity
+        onLongPress={() => setIsDeletedActive(true)}
+        onPress={() => setIsDeletedActive(false)}
+        activeOpacity={0.8}
+        style={styles.container}
+      >
+        <View style={styles.containerTextCheckBox}>
+          <CheckMark
+            id={id}
+            initialCompleted={completed === 1}
+            toggleTodoOnServer={toggleTodoOnServer}
+          />
+          <Text style={styles.subtitle}>{title}</Text>
+        </View>
+
+        <Feather
+          onPress={handlePresentModal}
+          name={shared_with_id ? "users" : "share"}
+          size={20}
+          color="#383839"
         />
-        <Text style={styles.subtitle}>{title}</Text>
-      </View>
 
-      {shared_with_id ? (
-        <Feather name="users" size={20} color="#383839" />
-      ) : (
-        <Feather name="share" size={20} color="#383839" />
-      )}
+        {isDeletedActive && (
+          <Pressable onPress={deleteTodo} style={styles.deleteButton}>
+            <Text style={{ color: "white", fontWeight: "bold" }}>X</Text>
+          </Pressable>
+        )}
+      </TouchableOpacity>
 
-      {isDeletedActive && (
-        <Pressable onPress={deleteTodo} style={styles.deleteButton}>
-          <Text style={{ color: "white", fontWeight: "bold" }}>X</Text>
-        </Pressable>
-      )}
-    </TouchableOpacity>
+      <BottomSheetModal
+        ref={bottomSheetRef}
+        index={0}
+        snapPoints={snapPoints}
+        backgroundStyle={{
+          borderRadius: 20,
+          padding: 20,
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: "#403e3eff", // línea negra
+          width: 40,
+          height: 4,
+          borderRadius: 2,
+        }}
+      >
+        <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+          {shared_with_id ? "Esta tarea ya está compartida" : "Compartir tarea"}
+        </Text>
+      </BottomSheetModal>
+    </>
   );
 }
 
@@ -125,10 +150,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 14,
     borderRadius: 21,
+    backgroundColor: "#fff",
+    marginVertical: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   containerTextCheckBox: {
     flex: 1,
-    textAlign: "center",
     flexDirection: "row",
     alignItems: "center",
   },
@@ -149,5 +180,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ccc",
   },
-  subtitle: { color: "#101318", fontSize: 14, fontWeight: "bold" },
+  subtitle: {
+    color: "#101318",
+    fontSize: 14,
+    fontWeight: "bold",
+  },
 });
